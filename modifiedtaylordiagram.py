@@ -438,6 +438,6 @@ if __name__=='__main__':
                    % list(string.ascii_uppercase)[i] for i,j in 
                    enumerate(model_label)], prop=dict(size='small'), 
                    loc=(0.8,0.9))
-    plt.savefig('C:\\Users\\Sean\\Google Drive\\Desktop\\fig02.png', dpi=600, facecolor='w',
-            edgecolor='w')                        
+    plt.savefig('/home/sean/fig1.png', dpi=600, facecolor='w',
+                edgecolor='w')                        
     plt.show()
