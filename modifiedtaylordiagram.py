@@ -139,7 +139,6 @@ class ModifiedTaylorDiagram(object):
         # Standard deviation axis extent
         self.smin = 0
         self.smax = sd_axis_frac*self.datastd
-        
 
         tr = PolarAxes.PolarTransform()
 
@@ -374,9 +373,11 @@ class ModifiedTaylorDiagram(object):
                 labels.append('         Norm factor')
         # Create a dictionary with the arists and the new handler_map
         dic = dict.fromkeys(obj, LegendHandler())
-        
+    
         # Add the legend
         self.ax.legend(obj, labels, handler_map = dic, *args, **kwargs)
+
+            
 
 
 
@@ -414,7 +415,7 @@ if __name__=='__main__':
                                 
     #Calcuate the colours for the points on the diagram, by passing the bias                             
     colors = dia.calc_colors(points[:,2])
-    print colors
+
     # Add colorbar to the diagram
     cbar = dia.add_colorbar(points[:,2], fontsize=14)
 
@@ -431,13 +432,13 @@ if __name__=='__main__':
         dia.add_point(stddev, corrcoef, model_label[i], marker='o', 
                       markersize=10., c=cm.jet(colors[i]), 
                       label="Model %s" % list(string.ascii_uppercase)[i])
-        print colors[i]
 
     # Add a legend to the diagram
     dia.add_legend(model_label, ["Model %s" 
                    % list(string.ascii_uppercase)[i] for i,j in 
                    enumerate(model_label)], prop=dict(size='small'), 
                    loc=(0.8,0.9))
-    plt.savefig('/home/sean/fig1.png', dpi=600, facecolor='w',
-                edgecolor='w')                        
+
+    plt.savefig('C:\\Users\\Sean\\Google Drive\\Desktop\\fig02.png', dpi=600, facecolor='w',
+            edgecolor='w')                        
     plt.show()
