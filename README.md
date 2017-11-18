@@ -9,3 +9,6 @@ Elvidge, S, M. J. Angling, and B. Nava, On the Use of Modified Taylor Diagrams t
 
 ## apollo_astronaut_az.py
 Code required to make the correlation plot between Apollo astronauts and Apollo mission number as discussed at: seanelvidge.com/apollonumbers
+
+## wcDraw.py
+Code for simulating the FIFA World Cup 2018 draw for the Group Stage. Discussed at: seanelvidge.com/2017/11/probabilityworldcupgroup
