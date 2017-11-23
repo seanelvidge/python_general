@@ -13,9 +13,11 @@ Created November 2017
 # In case you're on Python2.7 (I am)
 from __future__ import print_function
 import numpy as np
+import datetime as dt
+time = dt.datetime.now()
 
 # How many draw simulations?
-sims = 10000
+sims = 100000 # ~70s
 
 # Which team are you interested in?
 pickedTeam = "England"
@@ -29,7 +31,8 @@ class team():
         self.picked = 0
     
 class group():
-    def __init__(self):
+    def __init__(self, gName):
+        self.name = gName
         self.team1 = ''
         self.team2 = ''
         self.team3 = ''
@@ -115,76 +118,98 @@ if (len(pot1) != 8) or (len(pot2) != 8) or (len(pot3) != 8) or (len(pot4) != 8):
 # through the draw process
 pickedGroup = -1
 
-# A similar structure is called multiple times in the loop below so we use a
-# function:
-def addToGroups(groups, team, teamPick, pickedGroup):
-    # In some cases, the draw (in this format) is impossible. Catch them.
-    notUsed = True
-    for num in np.arange(8):
-            if getattr(groups[num],teamPick) == '':
-                # Team needed in this group
-                if groups[num].feds[team.fed] != 0:
-                    # This team is allowed in this group
-                    if team.name == pickedTeam:
-                        pickedGroup = num
-                    setattr(groups[num],teamPick,team)
-                    groups[num].feds[team.fed] -= 1
-                    notUsed = False
-                    break
-                
-    return pickedGroup, notUsed
+# A similar structure is called multiple times in the loop, 
+# so we use a function:
+def addToGroups(groups, pot, team, pickedGroup):
+    # Sometimes we get draws which can't happen, so loop around until 
+    # every group is 'full'
+    full = False
+    while full != True:
+        randomPot = np.random.choice(pot,size=8,replace=False)
+        for n in np.arange(8):
+            # The number of groups which each team is allowed to go into is no 
+            # longer necessarily 8. Loop over groups:
+            allowedGroupInd = []
+            for g in np.arange(8):
+                if ((groups[g].feds[randomPot[n].fed] > 0) and 
+                    (getattr(groups[g],team) == '')):
+                    allowedGroupInd.append(g)
+            
+            if len(allowedGroupInd) != 0:
+                # Now pick a random one that is allowed
+                randInd = np.random.choice(allowedGroupInd)
+                if randomPot[n].name == pickedTeam:
+                    pickedGroup = randInd
+                setattr(groups[randInd], team, randomPot[n])
+                # Update the number of feds in the group
+                groups[randInd].feds[randomPot[n].fed] -= 1
+            
+        # Check that all groups have a team in:
+        full = True
+        for g in groups:
+            if getattr(g,team) == '': 
+                full=False
+        
+        if full == False:
+            # A group isn't full, so reset the groups for this team pick
+            for g in groups: 
+                if getattr(g,team) != '':
+                    # Update confeds info and set this team pick back to blank
+                    g.feds[getattr(g,team).fed] += 1
+                    setattr(g,team,'')
+            
+    return groups, pickedGroup
+            
 
 # Run through the simulations
 for drawNum in np.arange(sims):
-    skip = 0
     # In each group at most 2 UEFA teams, 1 CAF, 1 AFC, 1 CONMEBOL and 1 
     # CONCACAF are allowed
 
     # 8 groups
-    groupA,groupB,groupC,groupD=group(),group(),group(),group()
-    groupE,groupF,groupG,groupH=group(),group(),group(),group()
+    groupA,groupB,groupC,groupD=group('A'),group('B'),group('C'),group('D')
+    groupE,groupF,groupG,groupH=group('E'),group('F'),group('G'),group('H')
     groups = [groupA,groupB,groupC,groupD,groupE,groupF,groupG,groupH]
     
-    # Randomly assign the pot1 teams
-    for n,team in enumerate(np.random.choice(pot1,size=8,replace=False)):
-        if team.name == pickedTeam:
-            pickedGroup = n
-        groups[n].team1 = team
-        groups[n].feds[team.fed] -= 1
-        
-    # Pot 2,3,4 pick is (somewhat) based on previous pick
-    pot2Rands = np.random.choice(pot2,size=8,replace=False)
-    pot3Rands = np.random.choice(pot3,size=8,replace=False)
-    pot4Rands = np.random.choice(pot4,size=8,replace=False)
+    # Team A1 has to be Russia
+    groups[0].team1 = rus
+    if 'Russia' == pickedTeam:
+        pickedGroup = 0
     
-    # Work through these random order and put in the next available group
-    for team in pot2Rands:
-        pickedGroup, nU = addToGroups(groups, team, 'team2', pickedGroup)
-        if nU == True:
-            skip = 1
-                
-    for team in pot3Rands:
-        pickedGroup, nU = addToGroups(groups, team, 'team3', pickedGroup)
-        if nU == True:
-            skip = 1
-        
-    for team in pot4Rands:
-        pickedGroup, nU = addToGroups(groups, team, 'team4', pickedGroup)
-        if nU == True:
-            skip = 1
+    # Shrink pot1 to exclude Russia. Russia should be first team in pot1, but
+    # add a quick error check just in case
+    if pot1[0].name != 'Russia': raise ValueError()
     
-    if skip != 1:
-        # The team we are interested in is in 'pickedGroup'. 
-        # Who else is with them?
-        for team in ['team1','team2','team3','team4']:
-            getattr(groups[pickedGroup],team).picked += 1
-    else:
-        # Some draws done like this are impossible (FIFA must have some
-        # things in place to stop this happening). So we exclude:
-        sims -= 1
+    # Draw rest of pot 1 teams into a random group
+    # Can't put someone else in Group A yet
+    randomPot1 = np.random.choice(pot1[1:],size=7,replace=False)
+    randomGroupInd = np.random.choice(np.arange(1,8),size=7,replace=False)
     
+    for n in np.arange(7):
+        if randomPot1[n].name == pickedTeam:
+            pickedGroup = randomGroupInd[n]
+        groups[randomGroupInd[n]].team1 = randomPot1[n]
+        groups[randomGroupInd[n]].feds[randomPot1[n].fed] -= 1
+
+    # Now pot 2
+    groups, pickedGroup = addToGroups(groups, pot2, 'team2', pickedGroup)
+
+    # Now pot 3
+    groups, pickedGroup = addToGroups(groups, pot3, 'team3', pickedGroup)
+    
+    # Now pot 4
+    groups, pickedGroup = addToGroups(groups, pot4, 'team4', pickedGroup)
+    
+    # The team we are interested in is in 'pickedGroup'. 
+    # Who else is with them?
+    for team in ['team1','team2','team3','team4']:
+        getattr(groups[pickedGroup],team).picked += 1
+
+
 # Finally print out the results
 for n,pot in enumerate([pot1,pot2,pot3,pot4]):
     print('Pot',n+1,':')
     for team in pot:
         print('   ',team.name,':',team.picked*100./sims,'%')
+        
+print(dt.datetime.now()-time)
