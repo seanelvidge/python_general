@@ -12,3 +12,6 @@ Code required to make the correlation plot between Apollo astronauts and Apollo 
 
 ## wcDraw.py
 Code for simulating the FIFA World Cup 2018 draw for the Group Stage. Discussed at: seanelvidge.com/2017/11/probabilityworldcupgroup
+
+## Shrove_Tue_Dist.py
+Code for finding the distribution of pancake day. Discussed at: http://seanelvidge.com/2017/02/distribution-of-pancake-day/
