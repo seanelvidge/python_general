@@ -207,7 +207,7 @@ for drawNum in np.arange(sims):
             pickedGroup = n+1
         group.team1 = randomPot1[n]
         group.feds[randomPot1[n].fed] -= 1
-        randomPot1[n].selected = group
+        randomPot1[n].selected = group.name
 
     # Now pot 2
     groups = addToGroups(groups, pot2, 'team2')
@@ -219,8 +219,9 @@ for drawNum in np.arange(sims):
     groups = addToGroups(groups, pot4, 'team4')
 
     # Still can get impossible situations (~1% of the time). These arise from 
-    # the way I have counted possibilites (by adding together 'spaces'). 
-    # Exclude those cases:
+    # the way I have counted possibilites (by adding together 'spaces'). There 
+    # is a work a round, but it makes the code a *lot* slower, whilst having no
+    # impact on the probabilities. Exclude those cases:
     fail = False
     for t in teams:
         if t.selected == '':
